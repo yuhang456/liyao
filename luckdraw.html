@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>瑶瑶小同学礼物抽奖</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+<script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<style type="text/css">
+body{
+	font-family: "华文细黑";
+  background:url("1.jpg") no-repeat;
+  background-size: 100%;
+   background-size:cover;
+}
+</style>
+</head>
+<body> 
+<div style="margin-left:400px;margin-top:20px">
+<input type="button" value="点击抽奖" onclick="spin();" class="btn btn-primary"/>
+</div>
+<canvas id="wheelcanvas" width="600" height="600" style="margin-left:200px;margin-top:10px;"></canvas>
+
+<div style="position: absolute;padding-left:100px;padding-top:20px;right:200px;top:100px;">
+
+<table class="table table-hover table-bordered" id="myTabel" style="text-align: center;">
+<thead>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;瑶瑶小同学已获得的奖品&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+</thead>
+<tbody id="tbodyClean">
+<tr>
+<td>暂无</td>
+</tr>
+</tbody>
+<tr>
+<td><input type="button" value="兑换奖品" onclick="jiangping()" class="btn btn-info btn-sm"/></td>
+</tr>
+
+</table>
+</div>
+<script type="application/javascript">
+var deleteBZ=0;
+var colors = ["#B8D430", "#3AB745"
+, "#029990", "#3501CB",
+"#2E2C75", "#673A7E", "#CC0071", "#F80120",
+"#F35B20", "#FB9A00", "#FFCC00", "#FEF200"
+];
+var restaraunts = ["眼影盒", "睫毛膏", "眼线笔"
+,"Armani气垫","粉底液",  "红包520","Suqqu粉霜",
+"Givenchy散粉", "NARS腮红",
+"娇兰隔离", "香缇卡隔离",  "口红"
+];
+var startAngle = 0;
+var arc = Math.PI / 6;
+var spinTimeout = null;
+var spinArcStart = 10;
+var spinTime = 0;
+var spinTimeTotal = 0;
+var ctx;
+function draw() {
+drawRouletteWheel();
+}
+function drawRouletteWheel() {
+var canvas = document.getElementById("wheelcanvas");
+if (canvas.getContext) {
+var outsideRadius = 200;
+var textRadius = 160;
+var insideRadius = 125;
+ctx = canvas.getContext("2d");
+ctx.clearRect(0,0,500,500);
+ctx.strokeStyle = "black";
+ctx.lineWidth = 2;
+ctx.font = 'bold 12px sans-serif';
+for(var i = 0; i < 12; i++) {
+var angle = startAngle + i * arc;
+ctx.fillStyle = colors[i];
+ctx.beginPath();
+ctx.arc(250, 250, outsideRadius, angle, angle + arc, false);
+ctx.arc(250, 250, insideRadius, angle + arc, angle, true);
+ctx.stroke();
+ctx.fill();
+ctx.save();
+ctx.shadowOffsetX = -1;
+ctx.shadowOffsetY = -1;
+ctx.shadowBlur = 0;
+ctx.shadowColor = "rgb(220,220,220)";
+ctx.fillStyle = "black";
+ctx.translate(250 + Math.cos(angle + arc / 2) * textRadius, 250 + Math.sin(angle + arc / 2) * textRadius);
+ctx.rotate(angle + arc / 2 + Math.PI / 2);
+var text = restaraunts[i];
+ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+ctx.restore();
+}
+//Arrow
+ctx.fillStyle = "black";
+ctx.beginPath();
+ctx.moveTo(250 - 4, 250 - (outsideRadius + 5));
+ctx.lineTo(250 + 4, 250 - (outsideRadius + 5));
+ctx.lineTo(250 + 4, 250 - (outsideRadius - 5));
+ctx.lineTo(250 + 9, 250 - (outsideRadius - 5));
+ctx.lineTo(250 + 0, 250 - (outsideRadius - 13));
+ctx.lineTo(250 - 9, 250 - (outsideRadius - 5));
+ctx.lineTo(250 - 4, 250 - (outsideRadius - 5));
+ctx.lineTo(250 - 4, 250 - (outsideRadius + 5));
+ctx.fill();
+}
+}
+function spin() {
+spinAngleStart = Math.random() * 10 + 10;
+spinTime = 0;
+spinTimeTotal = Math.random() * 3 + 15 * 1000;
+rotateWheel();
+}
+function rotateWheel() {
+spinTime += 30;
+if(spinTime >= spinTimeTotal) {
+stopRotateWheel();
+return;
+}
+var spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+startAngle += (spinAngle * Math.PI / 180);
+drawRouletteWheel();
+spinTimeout = setTimeout('rotateWheel()', 30);
+}
+function stopRotateWheel() {
+clearTimeout(spinTimeout);
+var degrees = startAngle * 180 / Math.PI + 90;
+var arcd = arc * 180 / Math.PI;
+var index = Math.floor((360 - degrees % 360) / arcd);
+ctx.save();
+ctx.font = 'bold 30px sans-serif';
+var text = restaraunts[index]
+ctx.fillText(text, 250 - ctx.measureText(text).width / 2, 250 + 10);//中间显示的东西
+ctx.restore();
+alert("恭喜瑶瑶小同学中了"+text);
+var _table = document.getElementById("myTabel");
+if(deleteBZ==0){
+_table.deleteRow(1);
+deleteBZ=deleteBZ+1;
+}
+var _tr = _table.insertRow(1);
+_td = null;
+_td = _tr.insertCell();
+_td.innerText = text;
+
+}
+function easeOut(t, b, c, d) {
+var ts = (t/=d)*t;
+var tc = ts*t;
+return b+c*(tc + -3*ts + 3*t);
+}
+draw();
+
+
+function jiangping(){
+	alert("兑换成功！小余同学正在快马加鞭的准备礼物....");
+	$("#tbodyClean").empty();
+}
+</script>
+</body>
+</html>
